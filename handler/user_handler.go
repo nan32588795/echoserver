@@ -1,74 +1,76 @@
 package handler
 
 import (
-	"database/sql"
 	"net/http"
 	"strconv"
 
-	"echoserver/repository"
+	"echoserver/models"
 
 	"github.com/labstack/echo/v4"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/queries/qm"
 )
 
-type UserHandler struct {
-	DB *sql.DB
-}
+type UserHandler struct{}
 
-func NewUserHandler(db *sql.DB) *UserHandler {
-	return &UserHandler{DB: db}
+func NewUserHandler() *UserHandler {
+	return &UserHandler{}
 }
 
 func (h *UserHandler) CreateUser(c echo.Context) error {
-	u := new(repository.User)
+	u := new(models.User)
 	if err := c.Bind(u); err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid request"})
 	}
-
-	if err := repository.CreateUser(h.DB, u); err != nil {
-		return err
+	err := u.Insert(c.Request().Context(), boil.GetContextDB(), boil.Infer())
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "insert failed"})
 	}
-
 	return c.JSON(http.StatusCreated, u)
 }
 
 func (h *UserHandler) GetUsers(c echo.Context) error {
-	users, err := repository.GetAllUsers(h.DB)
+	users, err := models.Users(qm.OrderBy("id")).All(c.Request().Context(), boil.GetContextDB())
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "fetch failed"})
 	}
 	return c.JSON(http.StatusOK, users)
 }
 
 func (h *UserHandler) GetUserByID(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
-	user, err := repository.GetUserByID(h.DB, id)
+	user, err := models.FindUser(c.Request().Context(), boil.GetContextDB(), id)
 	if err != nil {
-		return err
-	}
-	if user == nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"message": "User not found"})
+		return c.JSON(http.StatusNotFound, echo.Map{"error": "user not found"})
 	}
 	return c.JSON(http.StatusOK, user)
 }
 
 func (h *UserHandler) UpdateUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
-	u := new(repository.User)
-	if err := c.Bind(u); err != nil {
-		return err
+	user, err := models.FindUser(c.Request().Context(), boil.GetContextDB(), id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, echo.Map{"error": "user not found"})
 	}
-
-	if err := repository.UpdateUser(h.DB, id, u); err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"message": err.Error()})
+	if err := c.Bind(user); err != nil {
+		return c.JSON(http.StatusBadRequest, echo.Map{"error": "invalid request"})
 	}
-
-	return c.JSON(http.StatusOK, map[string]string{"message": "User updated"})
+	_, err = user.Update(c.Request().Context(), boil.GetContextDB(), boil.Infer())
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "update failed"})
+	}
+	return c.JSON(http.StatusOK, user)
 }
 
 func (h *UserHandler) DeleteUser(c echo.Context) error {
 	id, _ := strconv.Atoi(c.Param("id"))
-	if err := repository.DeleteUser(h.DB, id); err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"message": err.Error()})
+	user, err := models.FindUser(c.Request().Context(), boil.GetContextDB(), id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, echo.Map{"error": "user not found"})
 	}
-	return c.JSON(http.StatusOK, map[string]string{"message": "User deleted"})
+	_, err = user.Delete(c.Request().Context(), boil.GetContextDB())
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, echo.Map{"error": "delete failed"})
+	}
+	return c.NoContent(http.StatusNoContent)
 }

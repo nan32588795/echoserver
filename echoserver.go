@@ -4,10 +4,12 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/lib/pq"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 
 	"echoserver/config"
 	"echoserver/handler"
@@ -28,6 +30,10 @@ func main() {
 	}
 	defer db.Close()
 
+	boil.SetDB(db)
+	boil.DebugMode = true
+	boil.DebugWriter = os.Stdout
+
 	e := echo.New()
 	e.Use(middleware.Logger())
 	// e.Use(middleware.Recover())
@@ -45,7 +51,7 @@ func main() {
 	e.GET("/videos/download/:filename", videoHandler.DownloadFile)
 	e.GET("/videos/list", videoHandler.GetVideos)
 
-	userHandler := handler.NewUserHandler(db)
+	userHandler := handler.NewUserHandler()
 	e.POST("/users", userHandler.CreateUser)
 	e.GET("/users", userHandler.GetUsers)
 	e.GET("/users/:id", userHandler.GetUserByID)
