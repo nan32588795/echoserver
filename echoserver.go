@@ -13,6 +13,7 @@ import (
 
 	"echoserver/config"
 	"echoserver/handler"
+	"echoserver/validator"
 )
 
 func main() {
@@ -35,6 +36,8 @@ func main() {
 	boil.DebugWriter = os.Stdout
 
 	e := echo.New()
+	e.Validator = validator.NewCustomValidator()
+
 	e.Use(middleware.Logger())
 	// e.Use(middleware.Recover())
 
