@@ -37,3 +37,6 @@ sqlboiler psql --config sqlboiler_pg.toml --add-global-variants
 sqlboiler mysql --config sqlboiler_mysql.toml --add-global-variants
 ```
 
+# ビルドタグによる接続DBの切替
+go run -tags mysql .
+go run -tags pg .

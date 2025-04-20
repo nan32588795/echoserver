@@ -9,15 +9,13 @@ import (
 	"strconv"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	_ "github.com/lib/pq"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-
 	"echoserver/config"
 	"echoserver/handler"
 	"echoserver/validator"
+
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/volatiletech/sqlboiler/v4/boil"
 )
 
 func main() {
