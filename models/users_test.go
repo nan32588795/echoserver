@@ -568,7 +568,7 @@ func testUsersSelect(t *testing.T) {
 }
 
 var (
-	userDBTypes = map[string]string{`ID`: `integer`, `Username`: `character varying`, `Email`: `character varying`, `PasswordHash`: `character varying`, `CreatedAt`: `timestamp without time zone`, `UpdatedAt`: `timestamp without time zone`}
+	userDBTypes = map[string]string{`ID`: `int`, `Username`: `varchar`, `Email`: `varchar`, `PasswordHash`: `varchar`, `CreatedAt`: `timestamp`, `UpdatedAt`: `timestamp`}
 	_           = bytes.MinRead
 )
 
@@ -689,19 +689,22 @@ func testUsersUpsert(t *testing.T) {
 	if len(userAllColumns) == len(userPrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
+	if len(mySQLUserUniqueColumns) == 0 {
+		t.Skip("Skipping table with no unique columns to conflict on")
+	}
 
 	seed := randomize.NewSeed()
 	var err error
 	// Attempt the INSERT side of an UPSERT
 	o := User{}
-	if err = randomize.Struct(seed, &o, userDBTypes, true); err != nil {
+	if err = randomize.Struct(seed, &o, userDBTypes, false); err != nil {
 		t.Errorf("Unable to randomize User struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = o.Upsert(ctx, tx, false, nil, boil.Infer(), boil.Infer()); err != nil {
+	if err = o.Upsert(ctx, tx, boil.Infer(), boil.Infer()); err != nil {
 		t.Errorf("Unable to upsert User: %s", err)
 	}
 
@@ -718,7 +721,7 @@ func testUsersUpsert(t *testing.T) {
 		t.Errorf("Unable to randomize User struct: %s", err)
 	}
 
-	if err = o.Upsert(ctx, tx, true, nil, boil.Infer(), boil.Infer()); err != nil {
+	if err = o.Upsert(ctx, tx, boil.Infer(), boil.Infer()); err != nil {
 		t.Errorf("Unable to upsert User: %s", err)
 	}
 

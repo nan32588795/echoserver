@@ -7,6 +7,7 @@ toolchain go1.23.8
 require (
 	github.com/friendsofgo/errors v0.9.2
 	github.com/go-playground/validator v9.31.0+incompatible
+	github.com/go-sql-driver/mysql v1.9.2
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/lib/pq v1.10.9
@@ -19,6 +20,7 @@ require (
 )
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect

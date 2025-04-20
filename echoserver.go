@@ -2,10 +2,10 @@ package main
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"os"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/lib/pq"
@@ -18,14 +18,7 @@ import (
 
 func main() {
 
-	cfg, err := config.LoadConfig("config/config.json")
-	if err != nil {
-		log.Fatal("設定ファイルの読み込み失敗:", err)
-	}
-
-	db, err := sql.Open("postgres", cfg.DB.ConnString())
-	// connStr := "user=postgres password=postgres dbname=postgres sslmode=disable"
-	// db, err = sql.Open("postgres", connStr)
+	db, err := sql.Open(config.GlobalConfig.DriverName(), config.GlobalConfig.ConnString())
 	if err != nil {
 		panic(err)
 	}

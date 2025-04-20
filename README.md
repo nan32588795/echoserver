@@ -8,6 +8,17 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 登録日時
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- 更新日時
 );
+CREATE TABLE `users` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`),
+  UNIQUE KEY `email` (`email`)
+)
 INSERT INTO users (username, email, password_hash)
 VALUES 
   ('alice', 'alice@example.com', 'hashed_password_1'),
@@ -18,9 +29,11 @@ VALUES
 # sqlboiler導入・自動生成
 ```
 go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-psql@latest
+go install github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql@latest
 go install github.com/volatiletech/sqlboiler/v4@latest
 go get github.com/volatiletech/sqlboiler/v4@latest
 go get github.com/volatiletech/null/v8@latest
-sqlboiler psql --add-global-variants
+sqlboiler psql --config sqlboiler_pg.toml --add-global-variants
+sqlboiler mysql --config sqlboiler_mysql.toml --add-global-variants
 ```
 

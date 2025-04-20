@@ -1,0 +1,10 @@
+[mysql]
+  dbname = "database_name"
+  host = "localhost"
+  port = 13306
+  user = "username"
+  pass = "password"
+  sslmode = "false"
+
+[mysql.schema]
+  # schema = "your_schema_name"  # 通常は不要
