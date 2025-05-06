@@ -96,10 +96,13 @@ func main() {
 		return c.String(http.StatusOK, "DBクエリ成功")
 	})
 
-	videoHandler := handler.NewVideoHandler()
-	e.POST("/videos/upload", videoHandler.UploadFile)
-	e.GET("/videos/download/:filename", videoHandler.DownloadFile)
-	e.GET("/videos/list", videoHandler.GetVideos)
+	var videoService handler.VideoService = handler.NewVideoHandlerLocal()
+	// var videoService handler.VideoService = handler.NewVideoHandlerS3()
+	RegisterVideoRoutes(e, videoService)
+
+	// e.POST("/videos/upload", videoService.UploadFile)
+	// e.GET("/videos/download/:filename", videoService.DownloadFile)
+	// e.GET("/videos/list", videoService.GetVideos)
 
 	userHandler := handler.NewUserHandler()
 	e.POST("/users", userHandler.CreateUser)
@@ -117,4 +120,22 @@ func main() {
 	// e.Logger.Fatal(server.ListenAndServe())
 
 	e.Logger.Fatal(e.Start(":8080"))
+}
+
+// RegisterVideoRoutes は、動画関連のルートを登録する関数です。
+// 引数として、EchoインスタンスとVideoServiceインターフェースを受け取ります。
+// この関数は、動画のアップロード、ダウンロード、およびリスト取得のためのルートを設定します。
+// 引数:
+//   - e: Echoインスタンス
+//   - videoService: VideoServiceインターフェースの実装
+//
+// 戻り値: なし
+// 注意:
+//   - この関数は、Echoインスタンスにルートを登録するだけで、実際の処理はVideoServiceインターフェースの実装に依存します。
+//   - この関数は、動画関連のルートを管理するための便利な方法を提供します。
+//   - 引数として渡されたVideoServiceインターフェースの実装に基づいて、ルートの処理が行われます。
+func RegisterVideoRoutes(e *echo.Echo, videoService handler.VideoService) {
+	e.POST("/videos/upload", videoService.UploadFile)
+	e.GET("/videos/download/:filename", videoService.DownloadFile)
+	e.GET("/videos/list", videoService.GetVideos)
 }
